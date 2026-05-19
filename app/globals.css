@@ -1,26 +1,24 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Paleta de colores de WeFind */
+  --color-primary-orange: #F18A20;
+  --color-primary-orange-light: #FDE8D4;
+  --color-background-cream: #FDFBF7;
+  --color-surface-white: #FFFFFF;
+  --color-text-dark: #2C2C2C;
+  --color-text-gray: #8A8A8A;
+  --color-surface-variant-light: #F5F5F5;
+  --color-error-red: #E53935;
+
+  /* Redondeos extremos de la App (AppShapes) */
+  --radius-shape-small: 16px;   /* TextFields */
+  --radius-shape-medium: 24px;  /* Tarjetas / Cards */
+  --radius-shape-large: 50px;   /* Estilo Píldora para Botones */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Forzar el fondo crema global tal como en Compose */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background-cream);
+  color: var(--color-text-dark);
 }
