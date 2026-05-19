@@ -29,7 +29,7 @@ export default function ScanPage() {
   useEffect(() => {
     if (!tokenAcceso) return;
 
-    // Declaramos la función de ubicación primero para evitar problemas de hoisting
+    // Declaramos la función de ubicación primero para cumplir con las reglas del linter (Hoisting)
     const requestLocationAndRegister = () => {
       if (!navigator.geolocation) return;
 
@@ -66,18 +66,18 @@ export default function ScanPage() {
         const petJson = await petRes.json();
         setPetData(petJson);
 
-        // 2. Registrar el escaneo inicial (sin coordenadas)
+        // 2. Registrar el escaneo inicial inmediato (sin coordenadas)
         await fetch(`${API_URL}/pets/public/${tokenAcceso}/scan`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({}), 
         });
 
-        // 3. Solicitar permisos de ubicación (ahora sí está declarada antes)
+        // 3. Solicitar permisos de ubicación al navegador para enriquecer el escaneo
         requestLocationAndRegister();
 
       } catch (err) {
-        // Tipamos el error de forma segura en lugar de usar 'any'
+        // Control seguro de tipos para errores sin usar 'any'
         if (err instanceof Error) {
           setError(err.message);
         } else {
@@ -90,7 +90,6 @@ export default function ScanPage() {
     };
 
     fetchPetAndScan();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenAcceso, API_URL]);
 
   if (loading) {
@@ -117,8 +116,10 @@ export default function ScanPage() {
 
   return (
     <main className="min-h-screen bg-background-cream p-4 md:p-8 flex items-center justify-center">
+      {/* Tarjeta con shape-medium (24px) y fondo surface-white */}
       <div className="w-full max-w-md overflow-hidden rounded-shape-medium bg-surface-white shadow-xl shadow-gray-200/50 border border-gray-100">
         
+        {/* Banner dinámico de estado */}
         {petData.estaPerdido ? (
           <div className="bg-error-red py-3.5 text-center text-base font-bold text-white shadow-sm tracking-wide animate-pulse">
             ¡ESTOY PERDIDO! AYÚDAME A VOLVER
@@ -130,21 +131,32 @@ export default function ScanPage() {
         )}
 
         <div className="p-6 text-center">
-          <div className="relative mx-auto mb-5 h-44 w-44 overflow-hidden rounded-full border-4 border-background-cream shadow-md">
-            <Image
-              src={petData.fotoUrl || "/default-pet.png"}
-              alt={`Foto de ${petData.nombre}`}
-              fill
-              className="object-cover"
-              sizes="176px"
-              priority
-            />
+          {/* Contenedor adaptativo para Cloudinary con ContentScale.Crop */}
+          <div className="relative mx-auto mb-5 h-44 w-44 overflow-hidden rounded-full border-4 border-background-cream shadow-md bg-surface-variant-light flex items-center justify-center">
+            {petData.fotoUrl ? (
+              <Image
+                src={petData.fotoUrl}
+                alt={`Foto de ${petData.nombre}`}
+                fill
+                sizes="176px"
+                priority
+                className="object-cover object-center w-full h-full"
+              />
+            ) : (
+              <div className="text-text-gray">
+                <svg className="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            )}
           </div>
           
+          {/* Título de Tarjeta (titleMedium de Compose) */}
           <h1 className="text-[22px] font-bold text-text-dark tracking-tight">
             {petData.nombre}
           </h1>
           
+          {/* Bloque de contactos con shape-small (16px) */}
           <div className="mt-6 rounded-shape-small bg-surface-variant-light p-5 text-left border border-gray-100/50">
             <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-text-gray">
               Contactos de emergencia
@@ -166,6 +178,7 @@ export default function ScanPage() {
             ))}
           </div>
 
+          {/* Botón estilo píldora shape-large (50px) para Deep Linking */}
           <div className="mt-8">
             <a
               href={`petfinder://pet/${tokenAcceso}`}
