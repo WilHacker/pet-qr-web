@@ -29,7 +29,7 @@ export default function ScanPage() {
   useEffect(() => {
     if (!tokenAcceso) return;
 
-    // Declaramos la función de ubicación primero para cumplir con las reglas del linter (Hoisting)
+    // Declaramos la función de ubicación primero (Hoisting seguro para el linter)
     const requestLocationAndRegister = () => {
       if (!navigator.geolocation) return;
 
@@ -56,7 +56,7 @@ export default function ScanPage() {
 
     const fetchPetAndScan = async () => {
       try {
-        // 1. Obtener datos públicos de la mascota
+        // 1. Obtener datos de la mascota
         const petRes = await fetch(`${API_URL}/pets/public/${tokenAcceso}`);
         
         if (!petRes.ok) {
@@ -66,18 +66,18 @@ export default function ScanPage() {
         const petJson = await petRes.json();
         setPetData(petJson);
 
-        // 2. Registrar el escaneo inicial inmediato (sin coordenadas)
+        // 2. Registrar el escaneo inicial sin coordenadas
         await fetch(`${API_URL}/pets/public/${tokenAcceso}/scan`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({}), 
         });
 
-        // 3. Solicitar permisos de ubicación al navegador para enriquecer el escaneo
+        // 3. Solicitar y enviar la ubicación
         requestLocationAndRegister();
 
       } catch (err) {
-        // Control seguro de tipos para errores sin usar 'any'
+        // Tipado seguro para evitar el uso de 'any'
         if (err instanceof Error) {
           setError(err.message);
         } else {
@@ -91,6 +91,15 @@ export default function ScanPage() {
 
     fetchPetAndScan();
   }, [tokenAcceso, API_URL]);
+
+  // Manejador del botón con Fallback hacia la Play Store
+  const handleOpenApp = () => {
+    window.location.href = `petfinder://pet/${tokenAcceso}`;
+    
+    setTimeout(() => {
+      window.location.href = "https://play.google.com/store/apps/details?id=com.frontend.petfinder";
+    }, 2000);
+  };
 
   if (loading) {
     return (
@@ -116,10 +125,10 @@ export default function ScanPage() {
 
   return (
     <main className="min-h-screen bg-background-cream p-4 md:p-8 flex items-center justify-center">
-      {/* Tarjeta con shape-medium (24px) y fondo surface-white */}
+      {/* Tarjeta principal */}
       <div className="w-full max-w-md overflow-hidden rounded-shape-medium bg-surface-white shadow-xl shadow-gray-200/50 border border-gray-100">
         
-        {/* Banner dinámico de estado */}
+        {/* Banner de Estado */}
         {petData.estaPerdido ? (
           <div className="bg-error-red py-3.5 text-center text-base font-bold text-white shadow-sm tracking-wide animate-pulse">
             ¡ESTOY PERDIDO! AYÚDAME A VOLVER
@@ -131,7 +140,7 @@ export default function ScanPage() {
         )}
 
         <div className="p-6 text-center">
-          {/* Contenedor adaptativo para Cloudinary con ContentScale.Crop */}
+          {/* Avatar (Optimizado para Cloudinary) */}
           <div className="relative mx-auto mb-5 h-44 w-44 overflow-hidden rounded-full border-4 border-background-cream shadow-md bg-surface-variant-light flex items-center justify-center">
             {petData.fotoUrl ? (
               <Image
@@ -151,12 +160,11 @@ export default function ScanPage() {
             )}
           </div>
           
-          {/* Título de Tarjeta (titleMedium de Compose) */}
           <h1 className="text-[22px] font-bold text-text-dark tracking-tight">
             {petData.nombre}
           </h1>
           
-          {/* Bloque de contactos con shape-small (16px) */}
+          {/* Contactos */}
           <div className="mt-6 rounded-shape-small bg-surface-variant-light p-5 text-left border border-gray-100/50">
             <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-text-gray">
               Contactos de emergencia
@@ -178,16 +186,16 @@ export default function ScanPage() {
             ))}
           </div>
 
-          {/* Botón estilo píldora shape-large (50px) para Deep Linking */}
+          {/* Botón de App/Store */}
           <div className="mt-8">
-            <a
-              href={`petfinder://pet/${tokenAcceso}`}
-              className="block w-full rounded-shape-large bg-primary-orange px-6 py-4 text-center text-base font-bold text-white shadow-lg shadow-primary-orange/20 tracking-wider transition-all hover:brightness-105 active:scale-[0.98]"
+            <button
+              onClick={handleOpenApp}
+              className="block w-full cursor-pointer rounded-shape-large bg-primary-orange px-6 py-4 text-center text-base font-bold text-white shadow-lg shadow-primary-orange/20 tracking-wider transition-all hover:brightness-105 active:scale-[0.98]"
             >
               ABRIR EN LA APP
-            </a>
-            <p className="mt-3 text-sm text-text-gray font-normal">
-              Si tienes nuestra app instalada, toca aquí.
+            </button>
+            <p className="mt-3 text-sm font-normal text-text-gray">
+              Si tienes nuestra app instalada, se abrirá automáticamente.
             </p>
           </div>
         </div>
